@@ -1,0 +1,38 @@
+# This workflow will build a Java project with Maven.
+name: build
+
+on:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up environment
+        uses: actions/setup-java@v3
+        with:
+          java-version: 19.0.1+10
+          distribution: temurin
+          cache: maven
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Build with Maven
+        run: mvn -B clean deploy -Psign
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      - name: Archive results
+        uses: actions/upload-artifact@v3
+        with:
+          name: binaries
+          path: |
+            target/*.asc
+            target/*.jar
+            target/*.pom
+          retention-days: 1

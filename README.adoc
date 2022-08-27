@@ -1,0 +1,130 @@
+== Random Identifiers
+
+image:https://github.com/devnsi/random-ids/actions/workflows/build.yml/badge.svg[link=https://github.com/devnsi/random-ids/actions,title="build"]
+
+// tag::short[]
+Random Identifiers adds the lightweight capabilities to generate memorable identifiers by concatenating distinguishable english words together.
+// end::short[]
+
+Random alphanumeric strings and UUIDs are commonly used for test identifiers.
+These are easily produced but are more difficult to discern in logs and remember while correlating issues.
+There are some test data generators (for random names, cities, ...) to improve readability as an alternative.
+
+.Examples for default generated identifiers.
+[source,text]
+-------
+intimas-rhizosphere-acetylenic
+rivels-shiel-villadoms
+dedifferentiates-barrier-sooms
+reface-giggler-slayer
+centre-icebound-skulks
+-------
+
+== Usage
+
+=== Include as dependency
+
+.Maven Dependency
+[source,xml]
+-------
+
+<dependency>
+    <groupId>io.github.devnsi</groupId>
+    <artifactId>random-ids</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <scope>test</scope>
+</dependency>
+-------
+
+.Gradle Dependency
+[source,groovy]
+-------
+dependencies {
+    testImplementation 'io.github.devnsi:random-ids:1.0.0-SNAPSHOT'
+}
+-------
+
+=== Usage in code
+
+.Example static usage with default configuration.
+[source,java]
+----
+String id = RandomIds.next(); // ceibas-coeval-musher
+List<String> ids = RandomIds.next(5); // [ceibas-coeval-musher, ...]
+----
+
+.Example custom configuration with seeded random for reproducable results.
+[source,java]
+----
+RandomIdGen random = new RandomIdGen("~", 5, new Random(0));
+String id = random.next(); // wave~sorages~host~broo~arbutus
+----
+
+.Example configuration as stream with custom post-processing.
+[source,java]
+----
+RandomIdGen random = new RandomIdGen("", 3, new Random(0));
+random.setPostProcessor(word -> word.substring(0, 1).toUpperCase() + word.substring(1));
+random.stream().limit(3).forEach(System.out::println);
+// WaveSoragesHost
+// BrooArbutusAction
+// PoshlyExpectancesRoam
+----
+
+== Probability of collision
+
+The generated identifiers *do not* necessarily guarantee negligible probability of collision like UUIDs, therefore usage in production is discouraged.
+The probability is sufficiently low for most applications in tests.
+
+The number of generated identifier in order to have a 50% probability of at least one collision given a combination of two out of 100k words would require approximately 37 million draws for 3 word-combinations.
+
+:desc: n(p; d) denotes the number of random integers drawn from [1,d] to obtain a probability p that at least two numbers are the same (see xref:https://en.wikipedia.org/wiki/Birthday_problem#Probability_of_a_shared_birthday_(collision)[Wikipedia: Birthday problem]).
+
+ifdef::env-github[]
+.{desc}
+[source,text]
+----
+n(p;d) ≈ sqrt(2d*ln(1/(1-p)))
+----
+endif::[]
+
+ifndef::env-github[]
+:stem: latexmath
+.{desc}
+[stem]
+++++
+n(p;d) \approx \sqrt{2d \times \ln\left(\frac{1}{1-p}\right)}
+++++
+endif::[]
+
+:t: &#8201;
+
+.Probablity for collision by amount of words in the identifiers based all available words in dictionary (w).
+[cols="1,3,3",caption=]
+|===
+|Words (k) |Combinations (d=w^k) |draws (n) for 50% probability (p=0.5) of collision
+
+|1
+|100{t}000^1=100{t}000
+|≈372
+
+|2
+|100{t}000^2=10{t}000{t}000{t}000
+|117{t}741
+
+|3
+|100{t}000^3=1{t}000{t}000{t}000{t}000{t}000
+|37{t}233{t}000
+|===
+
+== Credits
+
+Word list based on https://github.com/sindresorhus/word-list. +
+Overall amount of words reduced to improve performance and save storage space. +
+Reduced to 100k words by culling longest and then by every n-th.
+
+Recommended alternatives include:
+
+* https://github.com/derekchuank/high-frequency-vocabulary
+* https://github.com/dwyl/english-words
+* https://github.com/jeremy-rifkin/Wordlist
