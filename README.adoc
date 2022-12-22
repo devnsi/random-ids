@@ -31,7 +31,7 @@ centre-icebound-skulks
 <dependency>
     <groupId>io.github.devnsi</groupId>
     <artifactId>random-ids</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <scope>test</scope>
 </dependency>
 -------
@@ -40,7 +40,7 @@ centre-icebound-skulks
 [source,groovy]
 -------
 dependencies {
-    testImplementation 'io.github.devnsi:random-ids:1.0.0-SNAPSHOT'
+    testImplementation 'io.github.devnsi:random-ids:1.0.0'
 }
 -------
 
